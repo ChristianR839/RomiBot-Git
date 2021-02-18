@@ -16,6 +16,7 @@ public class GunItButton extends CommandBase {
   @Override
   public void initialize() {
     ArcadeDrive.speedMultiplier = 1.0;
+    TankDrive.speedMultiplier = 1.0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -26,6 +27,7 @@ public class GunItButton extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     ArcadeDrive.speedMultiplier = 0.6;
+    TankDrive.speedMultiplier  = 0.6;
   }
 
   // Returns true when the command should end.
