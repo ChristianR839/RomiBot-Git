@@ -7,8 +7,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
-// import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import frc.robot.DifferentialDriveMod;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+// import frc.robot.DifferentialDriveMod;
 import frc.robot.sensors.RomiGyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -19,8 +19,8 @@ public class Drivetrain extends SubsystemBase {
 
   // The Romi has the left and right motors set to
   // PWM channels 0 and 1 respectively
-  private final Spark m_leftMotor = new Spark(0);
-  private final Spark m_rightMotor = new Spark(1);
+  private final Spark m_leftSpark = new Spark(0);
+  private final Spark m_rightSpark = new Spark(1);
 
   // The Romi has onboard encoders that are hardcoded
   // to use DIO pins 4/5 and 6/7 for the left and right
@@ -28,10 +28,20 @@ public class Drivetrain extends SubsystemBase {
   private final Encoder m_rightEncoder = new Encoder(6, 7);
 
   // Set up the differential drive controller
-  private final DifferentialDriveMod m_diffDrive = new DifferentialDriveMod(m_leftMotor, m_rightMotor);
+  // private final DifferentialDriveMod m_diffDriveMod = new
+  // DifferentialDriveMod(m_leftSpark, m_rightSpark);
+  private final DifferentialDrive m_diffDrive = new DifferentialDrive(m_leftSpark, m_rightSpark);
 
   // Set up the RomiGyro
   private final RomiGyro m_gyro = new RomiGyro();
+
+  private double currentAngle = 0;
+  private double angleMod = 0;
+  public double startingAngle; // = getGyroAngleZ();
+  private double deadband = 0.20975;
+  public static double speedMultiplier = 0.6;
+  public static double speedMultiplierAuto = 1.0; // .8
+  private boolean sideLeft;
 
   // Set up the BuiltInAccelerometer
   private final BuiltInAccelerometer m_accelerometer = new BuiltInAccelerometer();
@@ -54,6 +64,32 @@ public class Drivetrain extends SubsystemBase {
 
   public void arcadeDriveGyro(double xaxisSpeed, double zaxisRotate, double angle) {
     m_diffDrive.arcadeDrive(xaxisSpeed, zaxisRotate);
+  }
+
+  public double setStartingAngle() {
+    return getGyroAngleZ();
+  }
+
+  public void tankDriveAuto(double leftMotorSpeed, double rightMotorSpeed, double startingAngle) {
+    currentAngle = getGyroAngleZ();
+
+    System.out.println("CHECKING FOR DRIFT " + startingAngle + " " + currentAngle);
+    // double currentChange = currentAngle - lastAngle;
+
+    if (currentAngle < (startingAngle - deadband)) {
+      angleMod = 0.017;
+      sideLeft = true;
+    } else if (currentAngle > (startingAngle + deadband)) {
+      angleMod = 0.017;
+      sideLeft = false;
+    } else {
+      angleMod = 0;
+    }
+    if (sideLeft == true) {
+      tankDrive((speedMultiplierAuto * leftMotorSpeed + angleMod), (speedMultiplierAuto * rightMotorSpeed));
+    } else if (sideLeft == false) {
+      tankDrive((speedMultiplierAuto * leftMotorSpeed), (speedMultiplierAuto * rightMotorSpeed + angleMod));
+    }
   }
 
   public void resetEncoders() {

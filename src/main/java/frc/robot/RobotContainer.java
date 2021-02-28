@@ -79,6 +79,7 @@ public class RobotContainer {
     // Setup SmartDashboard options
     m_chooser.setDefaultOption("Mondrian Madness", new MondrianMadness(m_drivetrain));
     m_chooser.addOption("Auto Routine Time", new AutonomousTime(m_drivetrain));
+    m_chooser.addOption("Drive Straignt (TEST)", new MondrianMadness(m_drivetrain));
     SmartDashboard.putData(m_chooser);
   }
 
